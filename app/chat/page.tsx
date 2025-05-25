@@ -4,12 +4,14 @@ import { useEffect, useState } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useRouter } from "next/navigation"
 import ChatInterface from "@/components/chat-interface"
+import ChatDebug from "@/components/chat-debug"
 
 export default function ChatPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
   const router = useRouter()
+  const [chatReloadKey, setChatReloadKey] = useState(0)
 
   useEffect(() => {
     const getUser = async () => {
@@ -39,5 +41,14 @@ export default function ChatPage() {
     return null // Will redirect to login
   }
 
-  return <ChatInterface user={user} />
+  return (
+    <>
+      {process.env.NODE_ENV === "development" && (
+        <div className="p-4">
+          <ChatDebug user={user} onChatsReloaded={() => setChatReloadKey((prev) => prev + 1)} />
+        </div>
+      )}
+      <ChatInterface key={chatReloadKey} user={user} />
+    </>
+  )
 }
